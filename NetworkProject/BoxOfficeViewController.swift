@@ -144,8 +144,18 @@ extension BoxOfficeViewController: ViewDesignProtocol {
         
         // 코드 기반 셀 등록
         tableView.register(BoxOfficeTableViewCell.self, forCellReuseIdentifier: BoxOfficeTableViewCell.identifier)
+        
+        searchButton.addTarget(self, action: #selector(tappedSearchButton), for: .touchUpInside)
     }
     
+    @objc
+    func tappedSearchButton() {
+        print(#function)
+        sortedMovies.shuffle()
+        
+        tableView.reloadData()
+    }
+     
     
     
     
