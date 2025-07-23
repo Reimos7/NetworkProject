@@ -10,7 +10,11 @@ import SnapKit
 
 final class LottoViewController: UIViewController {
     
-    private let textField = {
+    let pickerView = UIPickerView()
+    
+    private let numbers = Array(1...1181)
+    
+    lazy var textField = {
         let tf = UITextField()
         tf.placeholder = "로또 번호를 입력해주세요"
         tf.keyboardType = .numberPad
@@ -21,6 +25,7 @@ final class LottoViewController: UIViewController {
         tf.layer.cornerRadius = 8
         tf.backgroundColor = .white
         tf.tintColor = .purple
+        tf.inputView = pickerView
         return tf
     }()
     
@@ -283,8 +288,33 @@ extension LottoViewController: ViewDesignProtocol {
     
     func configureView() {
         view.backgroundColor = .white
+        
+        pickerView.dataSource = self
+        pickerView.delegate = self
     }
     
     
 }
 
+
+// MARK: - UIPickerViewDataSource
+extension LottoViewController: UIPickerViewDataSource {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return numbers.count
+    }
+    
+    // 숫자 1개씩
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    
+}
+
+
+// MARK: - UIPickerViewDelegate
+extension LottoViewController: UIPickerViewDelegate {
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return "\(numbers[row])"
+    }
+}
