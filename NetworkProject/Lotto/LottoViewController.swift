@@ -47,7 +47,6 @@ final class LottoViewController: UIViewController {
     private let lineView = {
         let view = UIView()
         view.backgroundColor = .lightGray
-        //;;view.tintColor = .red
         return view
     }()
     
@@ -123,6 +122,9 @@ final class LottoViewController: UIViewController {
         
         setupLotto()
         
+        // 피커뷰 내리는 용도
+        setTapGesture()
+        
     }
     
     // 보너스 제외 번호 6개 세팅
@@ -194,7 +196,16 @@ final class LottoViewController: UIViewController {
         
         return backgroundView
     }
+    
+    private func setTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
    
+    @objc
+    func dismissKeyboard() {
+        view.endEditing(true)
+    }
 }
 
 extension LottoViewController: ViewDesignProtocol {
