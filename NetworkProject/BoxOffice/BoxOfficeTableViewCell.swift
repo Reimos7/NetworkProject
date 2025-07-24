@@ -87,9 +87,9 @@ extension BoxOfficeTableViewCell: ViewDesignProtocol {
     func configureLayout() {
         boxOfficeRankView.snp.makeConstraints { make in
             make.leading.equalTo(contentView.safeAreaLayoutGuide).offset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(30)
             make.centerY.equalTo(contentView)
-            make.width.equalTo(50)
+            make.width.equalTo(40)
         }
 
         boxOfficeRankLabel.snp.makeConstraints { make in
@@ -121,12 +121,14 @@ extension BoxOfficeTableViewCell: ViewDesignProtocol {
         boxOfficeRankLabel.font = .systemFont(ofSize: 16, weight: .bold)
         
         boxOfficeMovieName.text = "가나다"
+        boxOfficeMovieName.numberOfLines = 0
         boxOfficeMovieName.textColor = .white
         boxOfficeMovieName.textAlignment = .left
-        boxOfficeMovieName.font = .systemFont(ofSize: 16, weight: .bold)
+        boxOfficeMovieName.font = .systemFont(ofSize: 14, weight: .bold)
         
         boxOfficeMovieDate.text = "2020-04-01"
         boxOfficeMovieDate.textColor = .white
+        boxOfficeMovieDate.font = .systemFont(ofSize: 14, weight: .bold)
     
     }
     

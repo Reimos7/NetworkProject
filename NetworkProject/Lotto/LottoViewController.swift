@@ -31,6 +31,7 @@ final class LottoViewController: UIViewController {
         tf.layer.cornerRadius = 8
         tf.backgroundColor = .white
         tf.tintColor = .purple
+        tf.textAlignment = .center
         tf.inputView = picker
         return tf
     }()
@@ -46,6 +47,7 @@ final class LottoViewController: UIViewController {
     private let lottoDrawDate = {
         let label = UILabel()
         label.text = ""
+        label.textAlignment = .center
         label.textColor = .darkGray
         return label
     }()
@@ -59,7 +61,7 @@ final class LottoViewController: UIViewController {
     
     private let lottoRoundLabel = {
         let label = UILabel()
-        label.text = "1181 회"
+        label.text = "1181회"
         label.textColor = .systemYellow
         label.font = .boldSystemFont(ofSize: 28)
         //label.backgroundColor = .blue
@@ -287,7 +289,7 @@ extension LottoViewController: ViewDesignProtocol {
         
         lottoDrawDate.snp.makeConstraints { make in
             make.top.equalTo(textField.snp.bottom).offset(40)
-            make.trailing.equalTo(view.safeAreaLayoutGuide).inset(8)
+            make.trailing.equalTo(view.safeAreaLayoutGuide)
             make.height.equalTo(24)
             make.width.equalTo(150)
         }
@@ -308,7 +310,7 @@ extension LottoViewController: ViewDesignProtocol {
         
         lottoResultLabel.snp.makeConstraints { make in
             make.top.equalTo(lineView.snp.bottom).offset(50)
-            make.leading.equalTo(lottoRoundLabel.snp.trailing)
+            make.leading.equalTo(lottoRoundLabel.snp.trailing).offset(10)
             make.trailing.equalTo(view.safeAreaLayoutGuide).inset(50)
             make.height.equalTo(50)
             
@@ -388,7 +390,7 @@ extension LottoViewController: UIPickerViewDelegate {
         selectedPicker = String (numbers[row])        //selectedPicker = numbers[row]
         lottoRoundLabel.text = "\(selectedPicker) 회"
     
-        textField.text = selectedPicker
+        textField.text = "\(selectedPicker) 회"
         print("----")
         print(selectedPicker)
         print(lottoRequest(lottoDate: selectedPicker))

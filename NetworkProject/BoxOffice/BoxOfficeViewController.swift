@@ -38,16 +38,25 @@ final class BoxOfficeViewController: UIViewController {
     
     private let textField = {
         let tf = UITextField()
-        tf.placeholder = "영화 정보를 입력해주세요"
+        // placeholder 색상 설정
+        tf.attributedPlaceholder = NSAttributedString(
+            string: "영화 정보를 입력해주세요",
+            attributes: [.foregroundColor: UIColor.white]
+        )
         tf.keyboardType = .numberPad
         tf.borderStyle = .none
         tf.font = .boldSystemFont(ofSize: 15)
-        tf.layer.borderWidth = 1
-        tf.backgroundColor = .white
+        tf.textColor = .white
+        tf.backgroundColor = .clear
         tf.tintColor = .white
         return tf
     }()
     
+    private let textFieldLineStyleView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        return view
+    }()
     
     
     private let searchButton = {
@@ -146,6 +155,7 @@ extension BoxOfficeViewController: ViewDesignProtocol {
         view.addSubview(backgroundImage)
         view.addSubview(backgroundView)
         view.addSubview(textField)
+        view.addSubview(textFieldLineStyleView)
         view.addSubview(searchButton)
         view.addSubview(tableView)
     }
@@ -160,10 +170,17 @@ extension BoxOfficeViewController: ViewDesignProtocol {
         }
         
         textField.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(50)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(46)
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(30)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-120)
+        }
+        
+        textFieldLineStyleView.snp.makeConstraints { make in
+            make.top.equalTo(textField.snp.bottom)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.height.equalTo(5)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-150)
         }
         
         searchButton.snp.makeConstraints { make in
