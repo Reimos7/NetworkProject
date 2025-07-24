@@ -130,6 +130,8 @@ final class BoxOfficeViewController: UIViewController {
                     
                     
                 case .failure(let error):
+                    self.showAlert(title: "에러 발생", message: "\(self.calculateYesterday) 형식 기준으로 작성 해주세요", preferredStyle: .alert)
+                    self.textField.text = ""
                     print(error)
             }
                 
@@ -185,7 +187,7 @@ extension BoxOfficeViewController: ViewDesignProtocol {
         tableView.delegate = self
         tableView.rowHeight = 60
         
-        
+        textField.delegate = self
         
         // 코드 기반 셀 등록
         tableView.register(BoxOfficeTableViewCell.self, forCellReuseIdentifier: BoxOfficeTableViewCell.identifier)
@@ -193,16 +195,55 @@ extension BoxOfficeViewController: ViewDesignProtocol {
         searchButton.addTarget(self, action: #selector(tappedSearchButton), for: .touchUpInside)
     }
     
+    
+    // MARK: - 버튼 클릭
     @objc
     func tappedSearchButton() {
         print(#function)
-        sortedMovies.shuffle()
         
-        tableView.reloadData()
+        inputValidation()
+        
     }
      
     
-    
+    // MARK: - 입력값 검증 < 빈값 체크, 날짜 형식 검증, 미래 날짜인지 검증 (어제 기준으로 오늘과 미래 검증) >
+    private func inputValidation() {
+        guard let dateText = textField.text,
+              !dateText.isEmpty else {
+            self.showAlert(title: "에러 발생", message: "\(self.calculateYesterday) 형식 기준으로 작성 해주세요", preferredStyle: .alert)
+            textField.text = ""
+            return
+        }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        
+        // 사용자가 입력한 텍스트가 dateFormat 형식이 아니라면 alert 맞으면 아래 조건
+        guard let inputDate = dateFormatter.date(from: dateText) else {
+            self.showAlert(title: "입력 오류", message: "날짜 형식이 잘못됐어요\n\(self.calculateYesterday) 형식 기준으로 작성 해주세요", preferredStyle: .alert)
+            textField.text = ""
+            return
+        }
+        
+        // 어제 날짜 계산
+        let today = Date()
+        let calendar = Calendar.current
+        guard let yesterday = calendar.date(byAdding: .day, value: -1, to: today) else {return}
+        
+        // 사용자가 입력한 날짜가 어제 날짜보다 크다면 -> 미래라면 alert
+        // Date -> Comparable protocol
+        if inputDate > yesterday {
+            showAlert(title: "입력 오류", message: "어제보다 미래 날짜는 입력할 수 없어요", preferredStyle: .alert)
+            textField.text = ""
+        }
+        // 입력한 날짜를 string 으로 변경해야지 boxOfficeRequest 호출 가능
+        let inputDateString = dateFormatter.string(from: inputDate)
+        //sortedMovies.shuffle()
+        
+        boxOfficeRequest(movieDate: inputDateString)
+        
+        tableView.reloadData()
+    }
     
 }
 
@@ -237,4 +278,16 @@ extension BoxOfficeViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension BoxOfficeViewController: UITableViewDelegate {
     
+}
+
+
+// MARK: - UITextFieldDelegate
+// 엔터키 입력
+extension BoxOfficeViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        print(#function)
+        
+        inputValidation()
+        return true
+    }
 }
