@@ -103,10 +103,16 @@ extension BoxOfficeTableViewCell: ViewDesignProtocol {
             make.height.equalTo(40)
         }
         
+        // MARK: - MovieDate를 최고 우선순위로 설정 -> MovieName이 길면 MovieDate에 겹치지 않고 줄바꿈
+        boxOfficeMovieDate.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
         boxOfficeMovieDate.snp.makeConstraints { make in
+            // 사이 최소 간격 설정
+            make.leading.greaterThanOrEqualTo(boxOfficeMovieName.snp.trailing).offset(10)
             make.trailing.equalTo(contentView.snp.trailing).inset(20)
             make.centerY.equalTo(contentView)
-            make.height.equalTo(40)
+            //make.height.equalTo(40)
+            
         }
         
     }
@@ -124,11 +130,11 @@ extension BoxOfficeTableViewCell: ViewDesignProtocol {
         boxOfficeMovieName.numberOfLines = 0
         boxOfficeMovieName.textColor = .white
         boxOfficeMovieName.textAlignment = .left
-        boxOfficeMovieName.font = .systemFont(ofSize: 14, weight: .bold)
+        boxOfficeMovieName.font = .systemFont(ofSize: 16, weight: .bold)
         
         boxOfficeMovieDate.text = "2020-04-01"
         boxOfficeMovieDate.textColor = .white
-        boxOfficeMovieDate.font = .systemFont(ofSize: 14, weight: .bold)
+        boxOfficeMovieDate.font = .systemFont(ofSize: 16, weight: .bold)
     
     }
     
