@@ -7,12 +7,16 @@
 
 import UIKit
 import SnapKit
+import Alamofire
 
 final class BoxOfficeViewController: UIViewController {
     
     var movie = MovieInfo.movies
     
     var sortedMovies: [Movie] = []
+    
+    // api용
+    var boxOffice: [BoxOffice] = []
     
     var rank = 0
     
@@ -62,9 +66,25 @@ final class BoxOfficeViewController: UIViewController {
         configureView()
         
         //print(movie)
-        calculateRank()
+        //calculateRank()
+        
+        // 항상 어제 날짜 기준으로 박스오피스 정보 가져오기
+        boxOfficeRequest(movieDate: calculateYesterday)
     }
     
+    
+    // MARK: - 어제 날짜 계산
+    var calculateYesterday: String {
+        let today = Date()
+        let calendar = Calendar.current
+        // 현재 지역 기준 어제 날짜 구하기
+        let yesterDay = calendar.date(byAdding: .day, value: -1, to: today)!
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        let yesterString = dateFormatter.string(from: yesterDay)
+        return yesterString
+    }
     
     private func calculateRank() {
         
@@ -85,14 +105,39 @@ final class BoxOfficeViewController: UIViewController {
         dump(rank)
         
         dump(sortedMovie)
-        
-        
     }
-   
     
-   
     
+    // MARK: - Request API
+    func boxOfficeRequest(movieDate: String) {
+        var url = APIKey.movieURL
+        url += movieDate
+        print(url)
+        
+        AF.request(url, method: .get)
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: BoxOfficeResult.self) { response in
+                switch response.result {
+                
+                case .success(let value):
+                    print(value)
+                
+                    self.boxOffice = value.boxOfficeResult.dailyBoxOfficeList
+                    
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                    
+                    
+                case .failure(let error):
+                    print(error)
+            }
+                
+        }
+    }
 }
+    
+ 
 
 extension BoxOfficeViewController: ViewDesignProtocol {
     func configureHierarchy() {
@@ -138,7 +183,7 @@ extension BoxOfficeViewController: ViewDesignProtocol {
         tableView.backgroundColor = .clear
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.rowHeight = 80
+        tableView.rowHeight = 60
         
         
         
@@ -165,19 +210,22 @@ extension BoxOfficeViewController: ViewDesignProtocol {
 // MARK: - BoxOfficeViewController
 extension BoxOfficeViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return sortedMovies.count
+        //return sortedMovies.count
+        return boxOffice.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: BoxOfficeTableViewCell.identifier, for: indexPath) as! BoxOfficeTableViewCell
         
-        let movie = sortedMovies[indexPath.row]
-        let rank = indexPath.row + 1
+        //let movie = sortedMovies[indexPath.row]
+        let boxOffice = boxOffice[indexPath.row]
+        //let rank = indexPath.row + 1
         
         //cell.boxOfficeRankLabel.text = movie.jack
         
-        cell.configureCell(rankLabel: "\(rank)", name: movie.title, date: movie.releaseDate.customDateFormat)
-        
+        //cell.configureCell(rankLabel: "\(rank)", name: movie.title, date: movie.releaseDate.customDateFormat)
+        cell.configureCell(rankLabel: boxOffice.rank, name: boxOffice.movieNm, date: boxOffice.openDt)
+        cell.selectionStyle = .none
        
         return cell
     }
