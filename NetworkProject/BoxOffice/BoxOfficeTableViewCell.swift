@@ -66,7 +66,10 @@ final class BoxOfficeTableViewCell: UITableViewCell {
     func configureCell( rankLabel: String, name: String, date: String) {
         boxOfficeRankLabel.text = rankLabel
         boxOfficeMovieName.text = name
-        boxOfficeMovieDate.text = date 
+        boxOfficeMovieDate.text = date
+        
+        //죄와 벌 | 2022-33-33일 개봉 | 1위
+        
     }
 }
 

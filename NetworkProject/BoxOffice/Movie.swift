@@ -11,6 +11,10 @@ struct Movie {
     let title: String
     let releaseDate: String
     let audienceCount: Int
+    
+    var jack: String {
+        "\(title) | \(releaseDate)일 개봉 | \(audienceCount)위"
+    }
 }
 
 struct MovieInfo {

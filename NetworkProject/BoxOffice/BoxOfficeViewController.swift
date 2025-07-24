@@ -174,6 +174,8 @@ extension BoxOfficeViewController: UITableViewDataSource {
         let movie = sortedMovies[indexPath.row]
         let rank = indexPath.row + 1
         
+        //cell.boxOfficeRankLabel.text = movie.jack
+        
         cell.configureCell(rankLabel: "\(rank)", name: movie.title, date: movie.releaseDate.customDateFormat)
         
        

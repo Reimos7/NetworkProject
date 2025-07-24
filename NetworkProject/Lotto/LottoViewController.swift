@@ -7,12 +7,18 @@
 
 import UIKit
 import SnapKit
+import Alamofire
 
 final class LottoViewController: UIViewController {
     
-    let pickerView = UIPickerView()
+    let picker = UIPickerView()
     
-    private let numbers = Array(1...1181)
+    var selectedPicker = ""
+    
+    var bonusBall = 0
+    
+    // ReversedCollection을 타입 [Int] 타입 캐스팅
+    private let numbers: [Int] = Array(1...1181).reversed()
     
     lazy var textField = {
         let tf = UITextField()
@@ -25,7 +31,7 @@ final class LottoViewController: UIViewController {
         tf.layer.cornerRadius = 8
         tf.backgroundColor = .white
         tf.tintColor = .purple
-        tf.inputView = pickerView
+        tf.inputView = picker
         return tf
     }()
     
@@ -39,7 +45,7 @@ final class LottoViewController: UIViewController {
     
     private let lottoDrawDate = {
         let label = UILabel()
-        label.text = "2020-05-30 추첨"
+        label.text = ""
         label.textColor = .darkGray
         return label
     }()
@@ -53,7 +59,7 @@ final class LottoViewController: UIViewController {
     
     private let lottoRoundLabel = {
         let label = UILabel()
-        label.text = "913회"
+        label.text = "1181 회"
         label.textColor = .systemYellow
         label.font = .boldSystemFont(ofSize: 28)
         //label.backgroundColor = .blue
@@ -93,25 +99,29 @@ final class LottoViewController: UIViewController {
         return label
     }()
 
-    private let bonusLottoBall = {
-        let view = UIView()
-        view.backgroundColor = .systemGray2
-        view.layer.cornerRadius = 20
+//    private let bonusLottoBall = {
+//        let view = UIView()
+//        view.backgroundColor = .systemGray2
+//        view.layer.cornerRadius = 20
+//        
+//        let label = UILabel()
+//        label.text = "40"
+//        label.textAlignment = .center
+//        label.font = .systemFont(ofSize: 16, weight: .bold)
+//        label.textColor = .white
+//                
+//        view.addSubview(label)
+//        
+//        label.snp.makeConstraints { make in
+//            make.center.equalToSuperview()
+//        }
+//        
+//        return view 
+//    }()
+    
+    override func viewWillAppear(_ animated: Bool) {
         
-        let label = UILabel()
-        label.text = "40"
-        label.textAlignment = .center
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.textColor = .white
-                
-        view.addSubview(label)
-        
-        label.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-        
-        return view 
-    }()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -120,22 +130,34 @@ final class LottoViewController: UIViewController {
         configureLayout()
         configureView()
         
-        setupLotto()
         
         // 피커뷰 내리는 용도
         setTapGesture()
         
+        lottoRequest(lottoDate: "1181")
+        
+        
     }
     
     // 보너스 제외 번호 6개 세팅
-    private func setupLotto() {
-        let numers = [6, 14 ,16 ,21, 27, 37]
-        let colors: [UIColor] = [.systemYellow, .systemBlue, .systemBlue, .systemRed, .systemRed, .systemGray2]
+    private func setupLotto(data: Lotto) {
+        lottoDrawDate.text = data.drwNoDate
+                
+        // 스택뷰 비워줌
+        for view in lottoBallStackView.arrangedSubviews {
+            view.removeFromSuperview()
+        }
+        
+        let numers = [data.drwtNo1, data.drwtNo2 ,data.drwtNo3 ,data.drwtNo4, data.drwtNo5, data.drwtNo6, data.bnusNo]
+        
+        //bonusBall = data.bnusNo
+        
+        let colors: [UIColor] = [.systemYellow, .systemBlue, .systemBlue, .systemRed, .systemRed, .systemGray2, .systemGray2]
         // 로또 구조체 - 숫자, 색상
-        var lottoBalls: [Lotto] = []
+        var lottoBalls: [LottoBall] = []
         
         for index in 0..<numers.count {
-            let ball = Lotto(number: numers[index], color: colors[index])
+            let ball = LottoBall(number: numers[index], color: colors[index])
             lottoBalls.append(ball)
             
         }
@@ -145,7 +167,7 @@ final class LottoViewController: UIViewController {
     }
     
     // 구조체에 있는걸 스택뷰에 추가해줌
-    private func createLotto(lottos: [Lotto]) {
+    private func createLotto(lottos: [LottoBall]) {
         
         for ball in lottos {
             
@@ -197,6 +219,30 @@ final class LottoViewController: UIViewController {
         return backgroundView
     }
     
+    private func lottoRequest(lottoDate: String) {
+        // 로또 주소를 입력받은 로또 날짜로 get 하기
+        var url = APIKey.lottoURL
+        url += lottoDate
+        dump(url)
+        
+        
+        AF.request(url, method: .get)
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: Lotto.self) { response in
+                switch response.result {
+                case .success(let value):
+                    
+                    self.setupLotto(data: value)
+                    
+                    print("sucess", value)
+                case .failure(let value):
+                    print("failure", value)
+                }
+            }
+        
+        
+    }
+    
     private func setTapGesture() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
@@ -219,8 +265,8 @@ extension LottoViewController: ViewDesignProtocol {
         view.addSubview(lottoView)
         
         lottoView.addSubview(lottoBallStackView)
-        lottoView.addSubview(plusLabel)
-        lottoView.addSubview(bonusLottoBall)
+        //lottoView.addSubview(plusLabel)
+        //lottoView.addSubview(bonusLottoBall)
         
     }
     
@@ -282,26 +328,32 @@ extension LottoViewController: ViewDesignProtocol {
             make.height.equalTo(40)
         }
         
-        plusLabel.snp.makeConstraints { make in
-            make.leading.equalTo(lottoBallStackView.snp.trailing).offset(10)
-            make.centerY.equalToSuperview()
-            make.width.equalTo(20)
-        }
+//        plusLabel.snp.makeConstraints { make in
+//            make.leading.equalTo(lottoBallStackView.snp.trailing).offset(10)
+//            make.centerY.equalToSuperview()
+//            make.width.equalTo(20)
+//        }
         
-        bonusLottoBall.snp.makeConstraints { make in
-            make.leading.equalTo(plusLabel.snp.trailing).offset(10)
-            make.centerY.equalToSuperview()
-            make.size.equalTo(40)
-            
-        }
+//        bonusLottoBall.snp.makeConstraints { make in
+//            make.leading.equalTo(plusLabel.snp.trailing).offset(10)
+//            make.centerY.equalToSuperview()
+//            make.size.equalTo(40)
+//            
+//        }
         
     }
     
     func configureView() {
         view.backgroundColor = .white
         
-        pickerView.dataSource = self
-        pickerView.delegate = self
+        picker.dataSource = self
+        picker.delegate = self
+        
+        
+    }
+    
+    func setPicker() {
+        
     }
     
     
@@ -328,4 +380,18 @@ extension LottoViewController: UIPickerViewDelegate {
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return "\(numbers[row])"
     }
+    
+    
+    // MARK: - pickerView가 선택하면 값 넘겨주기
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+       
+        selectedPicker = String (numbers[row])        //selectedPicker = numbers[row]
+        lottoRoundLabel.text = "\(selectedPicker) 회"
+    
+        textField.text = selectedPicker
+        print("----")
+        print(selectedPicker)
+        print(lottoRequest(lottoDate: selectedPicker))
+    }
+    
 }
