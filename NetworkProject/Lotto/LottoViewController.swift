@@ -97,6 +97,7 @@ final class LottoViewController: UIViewController {
     private let plusLabel = {
         let label = UILabel()
         label.text = "+"
+        label.textAlignment = .center
         label.font = .systemFont(ofSize: 18, weight: .medium)
         return label
     }()
@@ -150,11 +151,15 @@ final class LottoViewController: UIViewController {
             view.removeFromSuperview()
         }
         
-        let numers = [data.drwtNo1, data.drwtNo2 ,data.drwtNo3 ,data.drwtNo4, data.drwtNo5, data.drwtNo6, data.bnusNo]
+        let numers = [data.drwtNo1, data.drwtNo2 ,data.drwtNo3 ,data.drwtNo4, data.drwtNo5, data.drwtNo6]
+        let bonusNum = data.bnusNo
         
         //bonusBall = data.bnusNo
         
-        let colors: [UIColor] = [.systemYellow, .systemBlue, .systemBlue, .systemRed, .systemRed, .systemGray2, .systemGray2]
+        let colors: [UIColor] = [.systemYellow, .systemBlue, .systemBlue, .systemRed, .systemRed, .systemGray2]
+        // 보너스는 색상 랜덤으로
+        let bonusColors: UIColor = colors.randomElement() ?? UIColor.systemGray2
+        
         // 로또 구조체 - 숫자, 색상
         var lottoBalls: [LottoBall] = []
         
@@ -163,13 +168,17 @@ final class LottoViewController: UIViewController {
             lottoBalls.append(ball)
             
         }
-        print(lottoBalls)
-        createLotto(lottos: lottoBalls)
+        let bonusBall = LottoBall(number: bonusNum, color: bonusColors)
+        //lottoBalls.append(bonusBall)
         
+        print(lottoBalls)
+        createLotto(lottos: lottoBalls, bonusBall: bonusBall)
+        
+       
     }
     
     // 구조체에 있는걸 스택뷰에 추가해줌
-    private func createLotto(lottos: [LottoBall]) {
+    private func createLotto(lottos: [LottoBall], bonusBall: LottoBall) {
         
         for ball in lottos {
             
@@ -177,8 +186,14 @@ final class LottoViewController: UIViewController {
             // 스택뷰에 각각의 공 추가
             lottoBallStackView.addArrangedSubview(lottoBall)
         }
+        let lottoBonusBall = createBall(number: bonusBall.number, color: bonusBall.color)
+        
+        lottoBallStackView.addArrangedSubview(plusLabel)
+        lottoBallStackView.addArrangedSubview(lottoBonusBall)
+        
         
     }
+   
     
     // 로또 공 한개씩 ui , addSubview, layout 설정
     private func createBall(number: Int, color: UIColor) -> UIView {
@@ -326,6 +341,7 @@ extension LottoViewController: ViewDesignProtocol {
         lottoBallStackView.snp.makeConstraints { make in
             //make.top.equalToSuperview()
             make.leading.equalTo(lottoView.snp.leading).offset(4)
+            make.trailing.equalTo(lineView.snp.trailing).offset(-4)
             make.centerY.equalToSuperview()
             make.height.equalTo(40)
         }
